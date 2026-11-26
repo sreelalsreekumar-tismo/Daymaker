@@ -40,7 +40,7 @@ public class AuthController(DaymakerDbContext db, JwtTokenService jwt, IConfigur
     {
         if (!env.IsDevelopment()) return NotFound();
         var key = string.IsNullOrWhiteSpace(user) ? "user" : new string(user.Where(char.IsLetterOrDigit).Take(40).ToArray());
-        return Ok(await SignIn("dev-" + key, $"{key}@daymaker.local", "Dev " + key, null));
+        return Ok(await SignIn("dev-" + key, $"{key}@daymaker.local", key == "user" ? "Dev User" : "Dev " + key, null));
     }
 
     private async Task<object> SignIn(string subject, string email, string name, string? picture)
