@@ -1,4 +1,4 @@
-import { Component, effect, inject, signal, viewChild } from '@angular/core';
+import { Component, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Api } from '../core/api.service';
@@ -8,11 +8,12 @@ import { TodoStore } from '../core/todo.store';
 import { Confirm, Toasts } from '../core/ui.services';
 import { Attachments } from '../shared/attachments';
 import { Icon } from '../shared/icon';
+import { Option, Select } from '../shared/select';
 
 /** Create/edit dialog for a todo. Opened through TodoStore so any page can launch it. */
 @Component({
   selector: 'dm-todo-form',
-  imports: [FormsModule, Icon, Attachments],
+  imports: [FormsModule, Icon, Attachments, Select],
   template: `
     @if (store.editor(); as req) {
       <div class="scrim" (click)="cancel()">
@@ -29,20 +30,10 @@ import { Icon } from '../shared/icon';
           <div class="grid2">
             <label class="field">Due <input type="datetime-local" name="due" [(ngModel)]="due" /></label>
             <label class="field">Reminder <input type="datetime-local" name="reminder" [(ngModel)]="reminder" /></label>
-            <label class="field">Priority
-              <select name="priority" [(ngModel)]="priority">@for (p of priorities; track p) { <option [value]="p">{{ p }}</option> }</select></label>
-            <label class="field">Status
-              <select name="status" [(ngModel)]="status">@for (s of statuses; track s.value) { <option [value]="s.value">{{ s.label }}</option> }</select></label>
-            <label class="field">Category
-              <select name="category" [(ngModel)]="categoryId">
-                <option [ngValue]="null">None</option>
-                @for (c of categories(); track c.id) { <option [ngValue]="c.id">{{ c.name }}</option> }
-                <option [ngValue]="-1">+ New category…</option>
-              </select></label>
-            <label class="field">Repeats
-              <select name="recurrence" [(ngModel)]="recurrence">
-                <option value="None">Never</option><option value="Daily">Daily</option><option value="Weekly">Weekly</option><option value="Monthly">Monthly</option>
-              </select></label>
+            <div class="field">Priority <dm-select name="priority" [options]="priorityOptions" [(ngModel)]="priority" ariaLabel="Priority" /></div>
+            <div class="field">Status <dm-select name="status" [options]="statusOptions" [(ngModel)]="status" ariaLabel="Status" /></div>
+            <div class="field">Category <dm-select name="category" [options]="categoryOptions()" [(ngModel)]="categoryId" ariaLabel="Category" /></div>
+            <div class="field">Repeats <dm-select name="recurrence" [options]="recurrenceOptions" [(ngModel)]="recurrence" ariaLabel="Repeats" /></div>
           </div>
           @if (categoryId === -1) {
             <div class="row"><input type="text" [value]="newCategory()" (input)="newCategory.set($any($event.target).value)" placeholder="Category name" maxlength="40" />
@@ -50,8 +41,12 @@ import { Icon } from '../shared/icon';
           }
 
           <label class="field">Tags (comma separated)
-            <input type="text" name="tags" [(ngModel)]="tagText" list="tag-list" placeholder="work, urgent" />
-            <datalist id="tag-list">@for (t of allTags(); track t) { <option [value]="t"></option> }</datalist></label>
+            <input type="text" name="tags" [(ngModel)]="tagText" placeholder="work, urgent" /></label>
+          @if (suggestions().length) {
+            <div class="row sugg" aria-label="Existing tags">
+              @for (t of suggestions(); track t) { <button type="button" class="chip tagbtn" (click)="addTag(t)">+ {{ t }}</button> }
+            </div>
+          }
 
           <fieldset class="group"><legend>Checklist</legend>
             @for (c of checklist(); track $index) {
@@ -113,6 +108,8 @@ import { Icon } from '../shared/icon';
     .group { border: 1px solid var(--border); border-radius: 10px; padding: 0.6rem 0.8rem; display: flex; flex-direction: column; gap: 0.4rem; }
     legend { padding: 0 0.3rem; color: var(--muted); font-size: 0.85rem; }
     .ck { flex-wrap: nowrap; } .done { text-decoration: line-through; color: var(--muted); }
+    .field { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.8rem; font-weight: 500; color: var(--muted); }
+    .sugg { gap: 0.35rem; margin-top: -0.3rem; } .tagbtn { cursor: pointer; border: 0; } .tagbtn:hover { background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--accent); }
     .check { gap: 0.5rem; } .actions { position: sticky; bottom: 0; background: var(--surface); padding-top: 0.5rem; }`,
 })
 export class TodoForm {
@@ -123,8 +120,12 @@ export class TodoForm {
   private router = inject(Router);
   private att = viewChild<Attachments>('att');
 
-  priorities = PRIORITIES;
-  statuses = STATUSES;
+  priorityOptions: Option[] = PRIORITIES.map((p) => ({ value: p, label: p }));
+  statusOptions: Option[] = STATUSES.map((s) => ({ value: s.value, label: s.label }));
+  recurrenceOptions: Option[] = [{ value: 'None', label: 'Never' }, { value: 'Daily', label: 'Daily' }, { value: 'Weekly', label: 'Weekly' }, { value: 'Monthly', label: 'Monthly' }];
+  categoryOptions = computed<Option[]>(() => [
+    { value: null, label: 'None' }, ...this.categories().map((c) => ({ value: c.id, label: c.name })), { value: -1, label: '+ New category…' },
+  ]);
   editing = signal<Todo | null>(null);
   categories = signal<Category[]>([]);
   allTags = signal<string[]>([]);
@@ -172,6 +173,11 @@ export class TodoForm {
       this.categories.set(cats); this.allTags.set(tags); this.google.set(g); this.subtasks.set(subs);
     } catch (e) { this.toasts.error(e); }
   }
+
+  private currentTags() { return this.tagText.split(',').map((t) => t.trim()).filter(Boolean); }
+  /** Existing tags not yet on this task, offered as one-tap chips (replaces the unstyleable native datalist). */
+  suggestions() { const cur = this.currentTags().map((t) => t.toLowerCase()); return this.allTags().filter((t) => !cur.includes(t.toLowerCase())).slice(0, 12); }
+  addTag(t: string) { this.tagText = [...this.currentTags(), t].join(', '); }
 
   async addCategory() {
     const name = this.newCategory().trim();
