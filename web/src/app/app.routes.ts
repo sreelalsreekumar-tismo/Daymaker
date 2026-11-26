@@ -1,0 +1,18 @@
+import { inject } from '@angular/core';
+import { CanActivateFn, Router, Routes } from '@angular/router';
+import { AuthService } from './core/auth.service';
+
+const authGuard: CanActivateFn = () => (inject(AuthService).isLoggedIn ? true : inject(Router).createUrlTree(['/login']));
+
+export const routes: Routes = [
+  { path: 'login', loadComponent: () => import('./login/login').then((m) => m.Login), title: 'Sign in · Daymaker' },
+  {
+    path: '',
+    canActivate: [authGuard],
+    loadComponent: () => import('./shell/shell').then((m) => m.Shell),
+    children: [
+      { path: '', pathMatch: 'full', loadComponent: () => import('./dashboard/dashboard').then((m) => m.Dashboard), title: 'Dashboard · Daymaker' },
+    ],
+  },
+  { path: '**', redirectTo: '' },
+];
