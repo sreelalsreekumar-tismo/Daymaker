@@ -99,7 +99,8 @@ export class Dashboard {
         this.api.events(start, end).catch(() => [] as CalendarEvent[]),
         this.api.notes({ pinned: true }).catch(() => []),
       ]);
-      const live = open.filter((t) => t.status !== 'Completed');
+      const overdueIds = new Set(over.map((t) => t.id)); // a task due earlier today is overdue, not also "today"
+      const live = open.filter((t) => t.status !== 'Completed' && !overdueIds.has(t.id));
       this.overdue.set(over);
       this.today_.set(live.filter((t) => new Date(t.dueUtc!) < end));
       this.upcoming.set(live.filter((t) => new Date(t.dueUtc!) >= end));

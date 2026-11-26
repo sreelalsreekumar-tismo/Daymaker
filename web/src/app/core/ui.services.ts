@@ -23,6 +23,7 @@ export class Toasts {
   private n = 0;
 
   show(text: string, kind: Toast['kind'] = 'ok', ms = 3500) {
+    if (this.items().some((t) => t.text === text && t.kind === kind)) return; // don't stack identical messages
     const id = ++this.n;
     this.items.update((l) => [...l, { id, text, kind }]);
     setTimeout(() => this.dismiss(id), kind === 'error' ? Math.max(ms, 6000) : ms);
