@@ -35,7 +35,7 @@ public class TodosController(DaymakerDbContext db, TodoService svc, CurrentUser 
         if (from is not null) query = query.Where(t => t.DueUtc >= from.Value.ToUniversalTime());
         if (to is not null) query = query.Where(t => t.DueUtc <= to.Value.ToUniversalTime());
         if (overdue == true) query = query.Where(t => t.Status != TodoStatus.Completed && t.DueUtc < DateTime.UtcNow);
-        if (!string.IsNullOrWhiteSpace(q)) query = query.Where(t => t.Title.Contains(q) || t.Description.Contains(q));
+        if (!string.IsNullOrWhiteSpace(q)) { var pat = SqlText.Contains(q.Trim()); query = query.Where(t => EF.Functions.Like(t.Title, pat, SqlText.Escape) || EF.Functions.Like(t.Description, pat, SqlText.Escape)); }
         return Ok(await svc.ToDtos(query.OrderBy(t => t.Status == TodoStatus.Completed).ThenBy(t => t.SortOrder).ThenBy(t => t.DueUtc ?? DateTime.MaxValue)));
     }
 
