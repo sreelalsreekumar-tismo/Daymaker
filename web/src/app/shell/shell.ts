@@ -3,6 +3,7 @@ import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } fro
 import { AuthService } from '../core/auth.service';
 import { TodoStore } from '../core/todo.store';
 import { Bell } from '../notifications/bell';
+import { Search } from '../search/search';
 import { TodoForm } from '../todos/todo-form';
 import { PreferencesService } from '../core/ui.services';
 import { Icon } from '../shared/icon';
@@ -10,7 +11,7 @@ import { ConfirmDialog, ToastHost } from '../shared/overlays';
 
 @Component({
   selector: 'dm-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, Icon, ToastHost, ConfirmDialog, TodoForm, Bell],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, Icon, ToastHost, ConfirmDialog, TodoForm, Bell, Search],
   template: `
     <div class="shell">
       <aside class="side" [class.open]="menu()">
@@ -32,7 +33,7 @@ import { ConfirmDialog, ToastHost } from '../shared/overlays';
       <div class="main">
         <header class="top">
           <button class="icon-btn menu-btn" (click)="menu.set(!menu())" aria-label="Menu"><dm-icon name="menu" [size]="22" /></button>
-          <div class="slot-search"><!--search--></div>
+          <div class="slot-search"><dm-search /></div>
           <div class="spacer"></div>
           <div class="slot-actions">
             <dm-bell />

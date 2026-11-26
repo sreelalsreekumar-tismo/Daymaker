@@ -125,6 +125,6 @@ export interface GoogleStatus {
 }
 export interface GoogleCalendarInfo { id: string; name: string; primary: boolean; selected: boolean }
 
-export interface SearchHit { kind: 'todo' | 'note' | 'event' | 'attachment'; id: number; title: string; snippet: string; date: string | null; parentId: number | null }
+export interface SearchHit { kind: 'todo' | 'note' | 'event' | 'attachment'; id: number; title: string; snippet: string; date: string | null; parentId: number | null; parentKind: 'todo' | 'note' | null }
 
 export interface ApiTokenInfo { id: number; name: string; canWrite: boolean; canDelete: boolean; createdUtc: string; lastUsedUtc: string | null }
