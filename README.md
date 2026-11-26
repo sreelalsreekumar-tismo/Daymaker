@@ -10,6 +10,12 @@ One place for **todos, Google Calendar and notes** — usable by hand in the app
 | Calendar | Google Calendar API (OAuth, incremental two-way sync) |
 | Claude | MCP server (stdio) using the official C# SDK |
 
+## UI highlights
+
+- Apple-style design: translucent surfaces, system colours, light/dark/system theme, accent colour picker.
+- Custom dropdowns and an Apple Calendar-style date/time picker (month grid, quick picks, time steppers, keyboard support) replace the native controls.
+- Todos in List, Card or **Kanban** layouts. In Kanban, drag cards between To do / In progress / Completed; the status saves immediately.
+
 ```
 src/Daymaker.Api      REST API, SignalR hub, auth, background workers
 src/Daymaker.Core     domain entities
