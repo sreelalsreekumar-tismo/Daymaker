@@ -491,6 +491,9 @@ namespace Daymaker.Data.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime?>("LastSummaryUtc")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("NoteLayout")
                         .IsRequired()
                         .HasColumnType("TEXT");
