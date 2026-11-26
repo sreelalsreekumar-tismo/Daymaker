@@ -8,11 +8,12 @@ import { Category, PRIORITIES, STATUSES, Todo, TodoStatus } from '../core/models
 import { TodoStore } from '../core/todo.store';
 import { PreferencesService, Toasts } from '../core/ui.services';
 import { Icon } from '../shared/icon';
+import { Option, Select } from '../shared/select';
 import { TodoCard } from './todo-card';
 
 @Component({
   selector: 'dm-todos',
-  imports: [FormsModule, Icon, TodoCard, CdkDropListGroup, CdkDropList, CdkDrag],
+  imports: [FormsModule, Icon, Select, TodoCard, CdkDropListGroup, CdkDropList, CdkDrag],
   template: `
     <div class="page">
       <div class="page-head">
@@ -27,16 +28,11 @@ import { TodoCard } from './todo-card';
 
       <div class="filters card">
         <input type="search" [(ngModel)]="q" (ngModelChange)="queryChanged()" placeholder="Filter by text…" aria-label="Filter by text" />
-        <select [(ngModel)]="status" (ngModelChange)="reload()" aria-label="Status">
-          <option value="">Any status</option>@for (s of statuses; track s.value) { <option [value]="s.value">{{ s.label }}</option> }</select>
-        <select [(ngModel)]="priority" (ngModelChange)="reload()" aria-label="Priority">
-          <option value="">Any priority</option>@for (p of priorities; track p) { <option [value]="p">{{ p }}</option> }</select>
-        <select [(ngModel)]="due" (ngModelChange)="reload()" aria-label="Due">
-          <option value="">Any date</option><option value="today">Due today</option><option value="week">Next 7 days</option><option value="overdue">Overdue</option></select>
-        <select [(ngModel)]="categoryId" (ngModelChange)="reload()" aria-label="Category">
-          <option [ngValue]="null">Any category</option>@for (c of categories(); track c.id) { <option [ngValue]="c.id">{{ c.name }}</option> }</select>
-        <select [(ngModel)]="tag" (ngModelChange)="reload()" aria-label="Tag">
-          <option value="">Any tag</option>@for (t of tags(); track t) { <option [value]="t">#{{ t }}</option> }</select>
+        <dm-select [options]="statusOptions" [(ngModel)]="status" (ngModelChange)="reload()" ariaLabel="Status" />
+        <dm-select [options]="priorityOptions" [(ngModel)]="priority" (ngModelChange)="reload()" ariaLabel="Priority" />
+        <dm-select [options]="dueOptions" [(ngModel)]="due" (ngModelChange)="reload()" ariaLabel="Due" />
+        <dm-select [options]="categoryOptions()" [(ngModel)]="categoryId" (ngModelChange)="reload()" ariaLabel="Category" />
+        <dm-select [options]="tagOptions()" [(ngModel)]="tag" (ngModelChange)="reload()" ariaLabel="Tag" />
         @if (filtered()) { <button class="btn ghost sm" (click)="clearFilters()">Clear</button> }
       </div>
 
@@ -102,7 +98,11 @@ export class Todos {
   store = inject(TodoStore);
 
   statuses = STATUSES;
-  priorities = PRIORITIES;
+  statusOptions: Option[] = [{ value: '', label: 'Any status' }, ...STATUSES.map((s) => ({ value: s.value, label: s.label }))];
+  priorityOptions: Option[] = [{ value: '', label: 'Any priority' }, ...PRIORITIES.map((p) => ({ value: p, label: p }))];
+  dueOptions: Option[] = [{ value: '', label: 'Any date' }, { value: 'today', label: 'Due today' }, { value: 'week', label: 'Next 7 days' }, { value: 'overdue', label: 'Overdue' }];
+  categoryOptions = computed<Option[]>(() => [{ value: null, label: 'Any category' }, ...this.categories().map((c) => ({ value: c.id, label: c.name }))]);
+  tagOptions = computed<Option[]>(() => [{ value: '', label: 'Any tag' }, ...this.tags().map((t) => ({ value: t, label: '#' + t }))]);
   layout = computed(() => this.prefs.prefs().todoLayout);
 
   todos = signal<Todo[]>([]);

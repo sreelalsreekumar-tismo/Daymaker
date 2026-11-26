@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnDestroy, effect, inject, input, output, signal, untracked, viewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, computed, effect, inject, input, output, signal, untracked, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Editor } from '@tiptap/core';
@@ -12,6 +12,7 @@ import { TodoStore } from '../core/todo.store';
 import { Confirm, Toasts } from '../core/ui.services';
 import { Attachments } from '../shared/attachments';
 import { Icon } from '../shared/icon';
+import { Option, Select } from '../shared/select';
 import { imageToDataUrl } from './note-html';
 
 type SaveState = 'saved' | 'saving' | 'dirty' | 'error';
@@ -19,7 +20,7 @@ type SaveState = 'saved' | 'saving' | 'dirty' | 'error';
 /** Rich-text note editor with autosave. Works on a note that already exists (the page creates it first). */
 @Component({
   selector: 'dm-note-editor',
-  imports: [FormsModule, Icon, Attachments],
+  imports: [FormsModule, Icon, Attachments, Select],
   template: `
     <div class="scrim" (click)="requestClose()">
       <div class="dlg card" (click)="$event.stopPropagation()" (keydown.escape)="requestClose()" role="dialog" aria-modal="true" aria-label="Edit note">
@@ -30,8 +31,7 @@ type SaveState = 'saved' | 'saving' | 'dirty' | 'error';
         </div>
 
         <div class="row meta">
-          <select [(ngModel)]="folderId" (ngModelChange)="touch()" aria-label="Folder">
-            <option [ngValue]="null">No folder</option>@for (f of folders(); track f.id) { <option [ngValue]="f.id">{{ f.name }}</option> }</select>
+          <dm-select [options]="folderOptions()" [(ngModel)]="folderId" (ngModelChange)="touch()" ariaLabel="Folder" />
           <input type="text" [(ngModel)]="tagText" (ngModelChange)="touch()" placeholder="Tags, comma separated" aria-label="Tags" />
           @if (note().sourceTodoId) { <button class="btn sm" (click)="openSource()"><dm-icon name="link" [size]="14" /> From task</button> }
         </div>
@@ -83,6 +83,7 @@ export class NoteEditor implements OnDestroy {
   note = input.required<Note>();
   folders = input<Folder[]>([]);
   closed = output<{ deleted: boolean }>();
+  folderOptions = computed<Option[]>(() => [{ value: null, label: 'No folder' }, ...this.folders().map((f) => ({ value: f.id, label: f.name }))]);
 
   title = ''; tagText = ''; folderId: number | null = null; pinned = false;
   state = signal<SaveState>('saved');
