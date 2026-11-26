@@ -12,6 +12,7 @@ export const routes: Routes = [
     loadComponent: () => import('./shell/shell').then((m) => m.Shell),
     children: [
       { path: '', pathMatch: 'full', loadComponent: () => import('./dashboard/dashboard').then((m) => m.Dashboard), title: 'Dashboard · Daymaker' },
+      { path: 'settings', loadComponent: () => import('./settings/settings').then((m) => m.Settings), title: 'Settings · Daymaker' },
       { path: 'todos', loadComponent: () => import('./todos/todos').then((m) => m.Todos), title: 'Todos · Daymaker' },
     ],
   },
