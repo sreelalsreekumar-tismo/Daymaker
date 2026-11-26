@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Daymaker.Api/Daymaker.Api.csproj" />
+    <Project Path="src/Daymaker.Core/Daymaker.Core.csproj" />
+    <Project Path="src/Daymaker.Data/Daymaker.Data.csproj" />
+    <Project Path="src/Daymaker.Google/Daymaker.Google.csproj" />
+    <Project Path="src/Daymaker.Mcp/Daymaker.Mcp.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Daymaker.Tests/Daymaker.Tests.csproj" />
+  </Folder>
+</Solution>
