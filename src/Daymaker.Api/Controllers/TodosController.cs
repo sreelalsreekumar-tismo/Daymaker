@@ -12,8 +12,15 @@ public record StatusRequest(TodoStatus Status, int? SortOrder);
 
 [ApiController, Authorize]
 [Route("api/v1/todos")]
-public class TodosController(DaymakerDbContext db, TodoService svc, CurrentUser me) : ControllerBase
+public class TodosController(DaymakerDbContext db, TodoService svc, CurrentUser me, NotificationService notifier) : ControllerBase
 {
+    private bool ViaApiToken => User.Identity?.AuthenticationType == ApiTokenHandler.Scheme;
+
+    /// <summary>Changes made through an API token (e.g. by Claude) surface in the notification center.</summary>
+    private Task Announce(string what, string title, int id) => ViaApiToken
+        ? notifier.Notify(me.Id, NotificationType.TaskUpdated, $"Task {what}", title, "todo", id)
+        : Task.CompletedTask;
+
     [HttpGet]
     public async Task<IActionResult> List([FromQuery] TodoStatus? status, [FromQuery] Priority? priority, [FromQuery] int? categoryId,
         [FromQuery] string? tag, [FromQuery] DateTime? from, [FromQuery] DateTime? to, [FromQuery] string? q,
@@ -48,6 +55,7 @@ public class TodosController(DaymakerDbContext db, TodoService svc, CurrentUser 
     {
         if (string.IsNullOrWhiteSpace(input.Title)) return BadRequest(new ProblemDetails { Title = "Title is required" });
         var t = await svc.Create(me.Id, input);
+        await Announce("created", t.Title, t.Id);
         return CreatedAtAction(nameof(Get), new { id = t.Id }, (await svc.ToDtos(svc.Query(me.Id).Where(x => x.Id == t.Id))).First());
     }
 
@@ -60,6 +68,7 @@ public class TodosController(DaymakerDbContext db, TodoService svc, CurrentUser 
         var wasDone = t.Status == TodoStatus.Completed;
         await svc.Apply(t, input, me.Id);
         await db.SaveChangesAsync();
+        await Announce("updated", t.Title, t.Id);
         if (!wasDone && t.Status == TodoStatus.Completed && t.Recurrence != Recurrence.None) { t.Status = TodoStatus.InProgress; await svc.Complete(t); }
         return Ok((await svc.ToDtos(svc.Query(me.Id).Where(x => x.Id == id))).First());
     }
@@ -70,6 +79,7 @@ public class TodosController(DaymakerDbContext db, TodoService svc, CurrentUser 
         var t = await svc.Query(me.Id).Include(x => x.Checklist).Include(x => x.Tags).FirstOrDefaultAsync(x => x.Id == id);
         if (t is null) return NotFound();
         var next = await svc.Complete(t);
+        await Announce("completed", t.Title, t.Id);
         return Ok(new { completed = id, next = next?.Id });
     }
 
@@ -104,6 +114,7 @@ public class TodosController(DaymakerDbContext db, TodoService svc, CurrentUser 
         await db.Attachments.Where(a => a.OwnerType == AttachmentOwner.Todo && a.OwnerId == id).ExecuteDeleteAsync();
         db.Todos.Remove(t);
         await db.SaveChangesAsync();
+        await Announce("deleted", t.Title, id);
         return NoContent();
     }
 }

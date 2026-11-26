@@ -32,6 +32,7 @@ public class UserPreferences
     public bool NotifyMeetings { get; set; } = true;
     public bool NotifyTaskUpdates { get; set; } = true;
     public bool NotifyDailySummary { get; set; } = true;
+    public DateTime? LastSummaryUtc { get; set; }
 }
 
 public class GoogleConnection

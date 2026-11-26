@@ -27,6 +27,10 @@ if (string.IsNullOrWhiteSpace(jwt.Key))
 builder.Services.AddSingleton<JwtTokenService>();
 builder.Services.AddScoped<CurrentUser>();
 builder.Services.AddScoped<Daymaker.Api.Services.TodoService>();
+builder.Services.AddScoped<Daymaker.Api.Services.NotificationService>();
+builder.Services.AddSignalR();
+builder.Services.AddSingleton<Daymaker.Api.Services.NotificationWorker>();
+builder.Services.AddHostedService(sp => sp.GetRequiredService<Daymaker.Api.Services.NotificationWorker>());
 
 builder.Services.AddAuthentication(o =>
     {
@@ -75,6 +79,7 @@ app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<Daymaker.Api.Services.NotificationHub>("/hubs/notifications");
 
 app.Run();
 
