@@ -171,6 +171,15 @@ input[type='checkbox'].switch:checked::after { transform: translateX(1.15rem); }
 @keyframes pop { from { opacity: 0; transform: scale(0.965) translateY(8px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
 
+/* Drag and drop (kanban): the picked-up card lifts and tilts; a dashed slot shows where it will land */
+.cdk-drag-preview { z-index: 300 !important; border-radius: var(--radius); box-shadow: var(--shadow-lg); cursor: grabbing; }
+.cdk-drag-preview dm-todo-card { display: block; transform: rotate(2deg) scale(1.03); }
+.cdk-drag-placeholder { border-radius: var(--radius); background: color-mix(in srgb, var(--accent) 8%, transparent); outline: 2px dashed color-mix(in srgb, var(--accent) 50%, transparent); outline-offset: -2px; }
+.cdk-drag-placeholder > * { visibility: hidden; }
+.cdk-drag-animating { transition: transform 0.22s var(--ease); }
+.cdk-drop-list-dragging .cdk-drag { transition: transform 0.22s var(--ease); }
+body.cdk-drag-dragging, .cdk-drag-dragging { cursor: grabbing; }
+
 /* Rich text editor (notes) */
 .ProseMirror { outline: none; min-height: 220px; }
 .ProseMirror p.is-editor-empty:first-child::before { content: attr(data-placeholder); float: left; color: var(--muted); pointer-events: none; height: 0; }
