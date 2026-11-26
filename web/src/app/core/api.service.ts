@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import {
   ApiTokenInfo, AppNotification, Attachment, CalendarEvent, Category, Folder, GoogleCalendarInfo, GoogleStatus, Note,
-  NoteInput, Preferences, SearchHit, Todo, TodoInput, TodoStatus,
+  EventInput, NoteInput, Preferences, SearchHit, Todo, TodoInput, TodoStatus,
 } from './models';
 
 const B = '/api/v1';
@@ -74,6 +74,9 @@ export class Api {
   events(from: Date, to: Date) {
     return firstValueFrom(this.http.get<CalendarEvent[]>(`${B}/calendar/events`, { params: params({ from: from.toISOString(), to: to.toISOString() }) }));
   }
+  createEvent(e: EventInput) { return firstValueFrom(this.http.post<CalendarEvent>(`${B}/calendar/events`, e)); }
+  updateEvent(id: number, e: EventInput) { return firstValueFrom(this.http.put<CalendarEvent>(`${B}/calendar/events/${id}`, e)); }
+  deleteEvent(id: number) { return firstValueFrom(this.http.delete<void>(`${B}/calendar/events/${id}`)); }
   googleStatus() { return firstValueFrom(this.http.get<GoogleStatus>(`${B}/google/status`)); }
   googleConnectUrl() { return firstValueFrom(this.http.get<{ url: string }>(`${B}/google/connect-url`)); }
   googleDisconnect() { return firstValueFrom(this.http.post<void>(`${B}/google/disconnect`, {})); }

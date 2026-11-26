@@ -82,6 +82,15 @@ export interface CalendarEvent {
   endUtc: string;
 }
 
+export interface EventInput {
+  title: string;
+  description?: string;
+  startUtc: string;
+  endUtc: string;
+  allDay?: boolean;
+  reminderMinutes?: number | null;
+}
+
 export interface AppNotification {
   id: number;
   type: string;

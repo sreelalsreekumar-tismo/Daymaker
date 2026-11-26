@@ -13,6 +13,7 @@ export const routes: Routes = [
     children: [
       { path: '', pathMatch: 'full', loadComponent: () => import('./dashboard/dashboard').then((m) => m.Dashboard), title: 'Dashboard · Daymaker' },
       { path: 'settings', loadComponent: () => import('./settings/settings').then((m) => m.Settings), title: 'Settings · Daymaker' },
+      { path: 'calendar', loadComponent: () => import('./calendar/calendar').then((m) => m.Calendar), title: 'Calendar · Daymaker' },
       { path: 'todos', loadComponent: () => import('./todos/todos').then((m) => m.Todos), title: 'Todos · Daymaker' },
     ],
   },
