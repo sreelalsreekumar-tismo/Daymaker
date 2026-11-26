@@ -16,6 +16,7 @@ export const routes: Routes = [
       { path: 'calendar', loadComponent: () => import('./calendar/calendar').then((m) => m.Calendar), title: 'Calendar · Daymaker' },
       { path: 'today', loadComponent: () => import('./today/today').then((m) => m.Today), title: 'Today · Daymaker' },
       { path: 'focus/:id', loadComponent: () => import('./today/focus').then((m) => m.Focus), title: 'Focus · Daymaker' },
+      { path: 'notes', loadComponent: () => import('./notes/notes').then((m) => m.Notes), title: 'Notes · Daymaker' },
       { path: 'todos', loadComponent: () => import('./todos/todos').then((m) => m.Todos), title: 'Todos · Daymaker' },
     ],
   },
