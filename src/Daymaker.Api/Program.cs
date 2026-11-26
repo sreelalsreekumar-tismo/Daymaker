@@ -26,6 +26,7 @@ if (string.IsNullOrWhiteSpace(jwt.Key))
 
 builder.Services.AddSingleton<JwtTokenService>();
 builder.Services.AddScoped<CurrentUser>();
+builder.Services.AddScoped<Daymaker.Api.Services.TodoService>();
 
 builder.Services.AddAuthentication(o =>
     {

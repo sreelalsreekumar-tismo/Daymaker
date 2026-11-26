@@ -54,7 +54,7 @@ public static class TokenHasher
 public class ApiTokenHandler(IOptionsMonitor<AuthenticationSchemeOptions> o, ILoggerFactory l, UrlEncoder e, DaymakerDbContext db)
     : AuthenticationHandler<AuthenticationSchemeOptions>(o, l, e)
 {
-    public const string Scheme = "ApiToken";
+    public new const string Scheme = "ApiToken";
 
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
