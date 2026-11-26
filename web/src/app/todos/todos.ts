@@ -64,13 +64,15 @@ import { TodoCard } from './todo-card';
           @case ('kanban') {
             <div class="board" cdkDropListGroup>
               @for (col of statuses; track col.value) {
-                <section class="col">
-                  <h3>{{ col.label }} <span class="chip">{{ columns()[col.value].length }}</span></h3>
-                  <div class="drop" cdkDropList [cdkDropListData]="columns()[col.value]" (cdkDropListDropped)="drop($event, col.value)">
+                <!-- the whole column (header, padding and empty space) is the drop target -->
+                <section class="col" cdkDropList [cdkDropListData]="columns()[col.value]" (cdkDropListDropped)="drop($event, col.value)"
+                         [attr.aria-label]="col.label + ' column'">
+                  <h3><span class="dot s-{{ col.value }}"></span>{{ col.label }} <span class="chip">{{ columns()[col.value].length }}</span></h3>
+                  <div class="drop">
                     @for (t of columns()[col.value]; track t.id) {
-                      <div cdkDrag [cdkDragData]="t"><dm-todo-card [todo]="t" mode="kanban" (toggle)="toggle($event)" (open)="store.openEdit($event)" (focus)="focusOn($event)" /></div>
+                      <div cdkDrag [cdkDragData]="t" class="drag"><dm-todo-card [todo]="t" mode="kanban" (toggle)="toggle($event)" (open)="store.openEdit($event)" (focus)="focusOn($event)" /></div>
                     }
-                    @if (!columns()[col.value].length) { <p class="muted small empty">Drop tasks here</p> }
+                    @if (!columns()[col.value].length) { <p class="hint muted small">Drag tasks here</p> }
                   </div>
                 </section>
               }
@@ -82,13 +84,16 @@ import { TodoCard } from './todo-card';
   styles: `
     .filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.5rem; margin-bottom: 1rem; align-items: center; }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--gap); align-items: start; }
-    .board { display: grid; grid-template-columns: repeat(3, minmax(250px, 1fr)); gap: var(--gap); overflow-x: auto; align-items: start; padding-bottom: 0.5rem; }
-    .col { background: var(--surface-2); border-radius: var(--radius); padding: 0.6rem; min-width: 250px; }
-    .col h3 { display: flex; align-items: center; gap: 0.5rem; margin: 0.2rem 0.3rem 0.6rem; }
-    .drop { display: flex; flex-direction: column; gap: 0.5rem; min-height: 5rem; }
-    .cdk-drag-preview { box-shadow: var(--shadow-lg); border-radius: var(--radius); }
-    .cdk-drag-placeholder { opacity: 0.35; }
-    .cdk-drag-animating { transition: transform 200ms; }`,
+    .board { display: grid; grid-template-columns: repeat(3, minmax(260px, 1fr)); gap: var(--gap); overflow-x: auto; align-items: stretch; padding-bottom: 0.5rem; }
+    .col { display: flex; flex-direction: column; background: var(--surface-2); border-radius: var(--radius); padding: 0.7rem; min-width: 260px; min-height: max(22rem, 55vh); transition: background 0.2s var(--ease), box-shadow 0.2s; }
+    .col h3 { display: flex; align-items: center; gap: 0.5rem; margin: 0.2rem 0.3rem 0.7rem; }
+    .dot.s-ToDo { background: var(--muted); } .dot.s-InProgress { background: var(--warn); } .dot.s-Completed { background: var(--ok); }
+    .drop { display: flex; flex-direction: column; gap: 0.55rem; flex: 1; }
+    .drag { cursor: grab; } .hint { text-align: center; margin: 2rem 0; pointer-events: none; }
+    /* column highlights while a card is being dragged over it */
+    .col.cdk-drop-list-receiving, .col.cdk-drop-list-dragging { box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--accent) 45%, transparent); }
+    .col.cdk-drop-list-dragging { background: color-mix(in srgb, var(--accent) 9%, var(--surface-2)); }
+    .col.cdk-drop-list-dragging .hint, .col.cdk-drop-list-receiving .hint { visibility: hidden; }`,
 })
 export class Todos {
   private api = inject(Api);
@@ -156,6 +161,7 @@ export class Todos {
   focusOn(t: Todo) { this.router.navigate(['/focus', t.id]); }
 
   async drop(ev: CdkDragDrop<Todo[]>, target: TodoStatus) {
+    if (ev.previousContainer === ev.container && ev.previousIndex === ev.currentIndex) return; // dropped back where it started
     const moved: Todo = ev.item.data;
     const cols = structuredClone(this.columns()) as Record<TodoStatus, Todo[]>;
     const from = cols[moved.status];
@@ -168,7 +174,8 @@ export class Todos {
     try {
       await this.api.setTodoStatus(moved.id, target, ev.currentIndex);
       await Promise.all(to.filter((x) => x.id !== moved.id).map((x, i) => this.api.setTodoStatus(x.id, x.status, i >= ev.currentIndex ? i + 1 : i)));
-      if (target === 'Completed' || moved.status === 'Completed') this.store.changed();
+      if (moved.status !== target) this.toasts.show(target === 'Completed' ? `Completed “${moved.title}”` : `Moved to ${STATUSES.find((s) => s.value === target)!.label}`);
+      if (target === 'Completed' || moved.status === 'Completed') this.store.changed(); // recurring tasks may spawn a new one
     } catch (e) { this.toasts.error(e, 'Could not move the task'); void this.reload(); }
   }
 }

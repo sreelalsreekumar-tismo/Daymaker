@@ -6,6 +6,7 @@ import { addDays, formatDay, formatTime, fromLocalInput, relativeTime, sameDay, 
 import { CalendarEvent, GoogleStatus, Todo } from '../core/models';
 import { TodoStore } from '../core/todo.store';
 import { Confirm, Toasts, errMsg } from '../core/ui.services';
+import { DateTime } from '../shared/datetime';
 import { Icon } from '../shared/icon';
 
 interface Entry { kind: 'todo' | 'event'; id: number; title: string; start: Date; allDay: boolean; done: boolean; overdue: boolean; todo?: Todo; event?: CalendarEvent }
@@ -18,7 +19,7 @@ function eventStart(e: CalendarEvent): Date {
 
 @Component({
   selector: 'dm-calendar',
-  imports: [FormsModule, Icon, RouterLink],
+  imports: [FormsModule, Icon, RouterLink, DateTime],
   template: `
     <div class="page">
       <div class="page-head">
@@ -101,9 +102,9 @@ function eventStart(e: CalendarEvent): Date {
           <label class="field">Title<input type="text" name="t" [(ngModel)]="f.title" required autofocus /></label>
           <label class="row"><input type="checkbox" name="ad" [(ngModel)]="f.allDay" /> All day</label>
           @if (!f.allDay) {
-            <div class="grid2"><label class="field">Starts<input type="datetime-local" name="s" [(ngModel)]="f.start" required /></label>
-              <label class="field">Ends<input type="datetime-local" name="e" [(ngModel)]="f.end" required /></label></div>
-          } @else { <label class="field">Date<input type="date" name="d" [(ngModel)]="f.date" required /></label> }
+            <div class="grid2"><div class="field">Starts <dm-datetime name="s" [ngModel]="f.start" (ngModelChange)="setStart(f, $event)" placeholder="Start" ariaLabel="Starts" /></div>
+              <div class="field">Ends <dm-datetime name="e" [(ngModel)]="f.end" placeholder="End" ariaLabel="Ends" /></div></div>
+          } @else { <div class="field">Date <dm-datetime name="d" mode="date" [(ngModel)]="f.date" placeholder="Choose date" ariaLabel="Date" /></div> }
           <label class="field">Description<textarea name="desc" [(ngModel)]="f.description"></textarea></label>
           <label class="field">Reminder (minutes before)<input type="text" name="rm" [(ngModel)]="f.reminder" inputmode="numeric" placeholder="Default" /></label>
           @if (formError()) { <p class="banner error small" role="alert">{{ formError() }}</p> }
@@ -254,6 +255,13 @@ export class Calendar {
     const s = new Date(day); s.setHours(10, 0, 0, 0);
     this.formError.set('');
     this.form.set({ title: '', allDay: false, start: toLocalInput(s.toISOString()), end: toLocalInput(addHours(s, 1).toISOString()), date: ymd(day), description: '', reminder: '' });
+  }
+
+  /** Changing the start moves the end too, keeping the event's length (as Apple Calendar does). */
+  setStart(f: { start: string; end: string }, v: string) {
+    const len = f.start && f.end ? new Date(f.end).getTime() - new Date(f.start).getTime() : 3600000;
+    f.start = v;
+    if (v) f.end = toLocalInput(new Date(new Date(v).getTime() + Math.max(len, 0)).toISOString());
   }
 
   openEntry(e: Entry) {
