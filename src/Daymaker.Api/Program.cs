@@ -1,5 +1,6 @@
 using Daymaker.Api.Auth;
 using Daymaker.Data;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
@@ -29,6 +30,15 @@ builder.Services.AddScoped<CurrentUser>();
 builder.Services.AddScoped<Daymaker.Api.Services.TodoService>();
 builder.Services.AddScoped<Daymaker.Api.Services.NotificationService>();
 builder.Services.AddSignalR();
+var dataProtection = builder.Services.AddDataProtection().SetApplicationName("Daymaker");
+if (builder.Configuration["DataProtection:KeysPath"] is { Length: > 0 } keysPath)
+    dataProtection.PersistKeysToFileSystem(new DirectoryInfo(keysPath)); // keep refresh tokens decryptable across restarts/deploys
+var googleOptions = builder.Configuration.GetSection("Google").Get<Daymaker.Google.GoogleOptions>() ?? new();
+builder.Services.AddSingleton(googleOptions);
+builder.Services.AddSingleton<Daymaker.Google.IGoogleCalendarGateway, Daymaker.Google.GoogleCalendarGateway>();
+builder.Services.AddScoped<Daymaker.Api.Services.GoogleSyncService>();
+builder.Services.AddScoped<Daymaker.Api.Services.CalendarPushService>();
+builder.Services.AddHostedService<Daymaker.Api.Services.GoogleSyncWorker>();
 builder.Services.AddSingleton<Daymaker.Api.Services.NotificationWorker>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<Daymaker.Api.Services.NotificationWorker>());
 

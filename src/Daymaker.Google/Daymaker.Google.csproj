@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Google.Apis.Calendar.v3" Version="1.78.0.4320" />
+  </ItemGroup>
+
 </Project>

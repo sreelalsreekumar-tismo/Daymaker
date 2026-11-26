@@ -12,7 +12,7 @@ public record StatusRequest(TodoStatus Status, int? SortOrder);
 
 [ApiController, Authorize]
 [Route("api/v1/todos")]
-public class TodosController(DaymakerDbContext db, TodoService svc, CurrentUser me, NotificationService notifier) : ControllerBase
+public class TodosController(DaymakerDbContext db, TodoService svc, CurrentUser me, NotificationService notifier, CalendarPushService calendar) : ControllerBase
 {
     private bool ViaApiToken => User.Identity?.AuthenticationType == ApiTokenHandler.Scheme;
 
@@ -56,7 +56,9 @@ public class TodosController(DaymakerDbContext db, TodoService svc, CurrentUser 
         if (string.IsNullOrWhiteSpace(input.Title)) return BadRequest(new ProblemDetails { Title = "Title is required" });
         var t = await svc.Create(me.Id, input);
         await Announce("created", t.Title, t.Id);
-        return CreatedAtAction(nameof(Get), new { id = t.Id }, (await svc.ToDtos(svc.Query(me.Id).Where(x => x.Id == t.Id))).First());
+        var syncError = await calendar.PushTodo(t, input.AddToCalendar == true);
+        var dto = (await svc.ToDtos(svc.Query(me.Id).Where(x => x.Id == t.Id))).First() with { SyncError = syncError };
+        return CreatedAtAction(nameof(Get), new { id = t.Id }, dto);
     }
 
     [HttpPut("{id:int}"), RequireScope("write")]
@@ -70,7 +72,8 @@ public class TodosController(DaymakerDbContext db, TodoService svc, CurrentUser 
         await db.SaveChangesAsync();
         await Announce("updated", t.Title, t.Id);
         if (!wasDone && t.Status == TodoStatus.Completed && t.Recurrence != Recurrence.None) { t.Status = TodoStatus.InProgress; await svc.Complete(t); }
-        return Ok((await svc.ToDtos(svc.Query(me.Id).Where(x => x.Id == id))).First());
+        var syncError = await calendar.PushTodo(t, input.AddToCalendar == true);
+        return Ok((await svc.ToDtos(svc.Query(me.Id).Where(x => x.Id == id))).First() with { SyncError = syncError });
     }
 
     [HttpPost("{id:int}/complete"), RequireScope("write")]
@@ -111,10 +114,12 @@ public class TodosController(DaymakerDbContext db, TodoService svc, CurrentUser 
     {
         var t = await svc.Query(me.Id).FirstOrDefaultAsync(x => x.Id == id);
         if (t is null) return NotFound();
+        var syncError = await calendar.RemoveTodoEvent(t);
         await db.Attachments.Where(a => a.OwnerType == AttachmentOwner.Todo && a.OwnerId == id).ExecuteDeleteAsync();
         db.Todos.Remove(t);
         await db.SaveChangesAsync();
         await Announce("deleted", t.Title, id);
+        if (syncError is not null) Response.Headers["X-Sync-Warning"] = syncError;
         return NoContent();
     }
 }

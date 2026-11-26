@@ -36,10 +36,11 @@ public class AuthController(DaymakerDbContext db, JwtTokenService jwt, IConfigur
 
     /// <summary>Development-only login so the app can be used without Google credentials.</summary>
     [HttpPost("dev")]
-    public async Task<IActionResult> Dev()
+    public async Task<IActionResult> Dev([FromQuery] string? user = null)
     {
         if (!env.IsDevelopment()) return NotFound();
-        return Ok(await SignIn("dev-user", "dev@daymaker.local", "Dev User", null));
+        var key = string.IsNullOrWhiteSpace(user) ? "user" : new string(user.Where(char.IsLetterOrDigit).Take(40).ToArray());
+        return Ok(await SignIn("dev-" + key, $"{key}@daymaker.local", "Dev " + key, null));
     }
 
     private async Task<object> SignIn(string subject, string email, string name, string? picture)

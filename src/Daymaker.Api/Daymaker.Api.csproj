@@ -19,6 +19,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Daymaker.Core\Daymaker.Core.csproj" />
     <ProjectReference Include="..\Daymaker.Data\Daymaker.Data.csproj" />
+    <ProjectReference Include="..\Daymaker.Google\Daymaker.Google.csproj" />
   </ItemGroup>
 
 </Project>

@@ -8,7 +8,7 @@ public record ChecklistDto(int? Id, string Text, bool Done);
 public record TodoDto(int Id, int? ParentId, string Title, string Description, DateTime? DueUtc, DateTime? ReminderUtc,
     Priority Priority, TodoStatus Status, int? CategoryId, string? CategoryName, string? CategoryColor, Recurrence Recurrence,
     string? GoogleEventId, int SortOrder, DateTime CreatedUtc, DateTime? CompletedUtc,
-    string[] Tags, ChecklistDto[] Checklist, int SubtaskCount, int SubtasksDone, int AttachmentCount);
+    string[] Tags, ChecklistDto[] Checklist, int SubtaskCount, int SubtasksDone, int AttachmentCount, string? SyncError = null);
 
 public record TodoInput(string Title, string? Description, DateTime? DueUtc, DateTime? ReminderUtc, Priority? Priority,
     TodoStatus? Status, int? CategoryId, Recurrence? Recurrence, int? ParentId, string[]? Tags, ChecklistDto[]? Checklist,
