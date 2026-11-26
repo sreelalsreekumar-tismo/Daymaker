@@ -36,7 +36,7 @@ public class NotesController(DaymakerDbContext db, TodoService todos, CurrentUse
         if (folderId is not null) query = query.Where(n => n.FolderId == folderId);
         if (pinned is not null) query = query.Where(n => n.Pinned == pinned);
         if (!string.IsNullOrWhiteSpace(tag)) query = query.Where(n => n.Tags.Any(t => t.Tag.Name == tag));
-        if (!string.IsNullOrWhiteSpace(q)) query = query.Where(n => n.Title.Contains(q) || n.ContentHtml.Contains(q));
+        if (!string.IsNullOrWhiteSpace(q)) { var pat = SqlText.Contains(q.Trim()); query = query.Where(n => EF.Functions.Like(n.Title, pat, SqlText.Escape) || EF.Functions.Like(n.ContentHtml, pat, SqlText.Escape)); }
         return Ok(await ToDtos(query.OrderByDescending(n => n.Pinned).ThenByDescending(n => n.UpdatedUtc)));
     }
 
