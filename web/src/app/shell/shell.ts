@@ -1,13 +1,15 @@
 import { Component, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../core/auth.service';
+import { TodoStore } from '../core/todo.store';
+import { TodoForm } from '../todos/todo-form';
 import { PreferencesService } from '../core/ui.services';
 import { Icon } from '../shared/icon';
 import { ConfirmDialog, ToastHost } from '../shared/overlays';
 
 @Component({
   selector: 'dm-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, Icon, ToastHost, ConfirmDialog],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, Icon, ToastHost, ConfirmDialog, TodoForm],
   template: `
     <div class="shell">
       <aside class="side" [class.open]="menu()">
@@ -31,16 +33,19 @@ import { ConfirmDialog, ToastHost } from '../shared/overlays';
           <button class="icon-btn menu-btn" (click)="menu.set(!menu())" aria-label="Menu"><dm-icon name="menu" [size]="22" /></button>
           <div class="slot-search"><!--search--></div>
           <div class="spacer"></div>
-          <div class="slot-actions"><!--actions--></div>
+          <div class="slot-actions">
+            <button class="btn primary" (click)="todoStore.openNew()"><dm-icon name="plus" /> <span class="lbl">New task</span></button>
+          </div>
         </header>
         <main><router-outlet /></main>
       </div>
     </div>
-    <dm-toasts /><dm-confirm />`,
+    <dm-todo-form /><dm-toasts /><dm-confirm />`,
   styleUrl: './shell.css',
 })
 export class Shell {
   auth = inject(AuthService);
+  todoStore = inject(TodoStore);
   menu = signal(false);
   nav = [
     { path: '/', label: 'Dashboard', icon: 'home' },
