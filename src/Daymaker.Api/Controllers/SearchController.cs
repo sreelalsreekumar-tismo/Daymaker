@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Daymaker.Api.Controllers;
 
-public record SearchHit(string Kind, int Id, string Title, string Snippet, DateTime? Date, int? ParentId = null);
+public record SearchHit(string Kind, int Id, string Title, string Snippet, DateTime? Date, int? ParentId = null, string? ParentKind = null);
 
 [ApiController, Authorize, Route("api/v1/search")]
 public class SearchController(DaymakerDbContext db, CurrentUser me) : ControllerBase
@@ -45,7 +45,7 @@ public class SearchController(DaymakerDbContext db, CurrentUser me) : Controller
             hits.AddRange((await db.Attachments.AsNoTracking().Where(a => a.UserId == me.Id && EF.Functions.Like(a.FileName, pat, SqlText.Escape))
                 .OrderByDescending(a => a.CreatedUtc).Take(limit)
                 .Select(a => new { a.Id, a.FileName, a.OwnerType, a.OwnerId, a.CreatedUtc }).ToListAsync())
-                .Select(a => new SearchHit("attachment", a.Id, a.FileName, a.OwnerType == AttachmentOwner.Todo ? "Attached to a task" : "Attached to a note", a.CreatedUtc, a.OwnerId)));
+                .Select(a => new SearchHit("attachment", a.Id, a.FileName, a.OwnerType == AttachmentOwner.Todo ? "Attached to a task" : "Attached to a note", a.CreatedUtc, a.OwnerId, a.OwnerType == AttachmentOwner.Todo ? "todo" : "note")));
 
         return Ok(hits);
     }
