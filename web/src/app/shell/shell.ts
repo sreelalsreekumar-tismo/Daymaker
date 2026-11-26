@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../core/auth.service';
 import { TodoStore } from '../core/todo.store';
+import { Bell } from '../notifications/bell';
 import { TodoForm } from '../todos/todo-form';
 import { PreferencesService } from '../core/ui.services';
 import { Icon } from '../shared/icon';
@@ -9,7 +10,7 @@ import { ConfirmDialog, ToastHost } from '../shared/overlays';
 
 @Component({
   selector: 'dm-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, Icon, ToastHost, ConfirmDialog, TodoForm],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, Icon, ToastHost, ConfirmDialog, TodoForm, Bell],
   template: `
     <div class="shell">
       <aside class="side" [class.open]="menu()">
@@ -34,6 +35,7 @@ import { ConfirmDialog, ToastHost } from '../shared/overlays';
           <div class="slot-search"><!--search--></div>
           <div class="spacer"></div>
           <div class="slot-actions">
+            <dm-bell />
             <button class="btn primary" (click)="todoStore.openNew()"><dm-icon name="plus" /> <span class="lbl">New task</span></button>
           </div>
         </header>
