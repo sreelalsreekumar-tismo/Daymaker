@@ -8,12 +8,13 @@ import { TodoStore } from '../core/todo.store';
 import { Confirm, Toasts } from '../core/ui.services';
 import { Attachments } from '../shared/attachments';
 import { Icon } from '../shared/icon';
+import { DateTime } from '../shared/datetime';
 import { Option, Select } from '../shared/select';
 
 /** Create/edit dialog for a todo. Opened through TodoStore so any page can launch it. */
 @Component({
   selector: 'dm-todo-form',
-  imports: [FormsModule, Icon, Attachments, Select],
+  imports: [FormsModule, Icon, Attachments, Select, DateTime],
   template: `
     @if (store.editor(); as req) {
       <div class="scrim" (click)="cancel()">
@@ -28,8 +29,8 @@ import { Option, Select } from '../shared/select';
             <textarea name="description" [(ngModel)]="description" placeholder="Details, links, context…"></textarea></label>
 
           <div class="grid2">
-            <label class="field">Due <input type="datetime-local" name="due" [(ngModel)]="due" /></label>
-            <label class="field">Reminder <input type="datetime-local" name="reminder" [(ngModel)]="reminder" /></label>
+            <div class="field">Due <dm-datetime name="due" [(ngModel)]="due" placeholder="Add due date" ariaLabel="Due date" /></div>
+            <div class="field">Reminder <dm-datetime name="reminder" [(ngModel)]="reminder" placeholder="Add reminder" ariaLabel="Reminder" /></div>
             <div class="field">Priority <dm-select name="priority" [options]="priorityOptions" [(ngModel)]="priority" ariaLabel="Priority" /></div>
             <div class="field">Status <dm-select name="status" [options]="statusOptions" [(ngModel)]="status" ariaLabel="Status" /></div>
             <div class="field">Category <dm-select name="category" [options]="categoryOptions()" [(ngModel)]="categoryId" ariaLabel="Category" /></div>
