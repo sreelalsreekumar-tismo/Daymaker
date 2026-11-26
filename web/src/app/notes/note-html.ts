@@ -12,9 +12,13 @@ export function noteToText(html: string): string {
  */
 export function noteToReadonlyHtml(html: string): string {
   const doc = new DOMParser().parseFromString(html, 'text/html');
+  // Angular's sanitizer drops data-* attributes, so mark checklists with classes (which it keeps) for styling.
+  doc.querySelectorAll('ul[data-type="taskList"]').forEach((ul) => ul.classList.add('tasklist'));
   doc.querySelectorAll('li[data-type="taskItem"]').forEach((li) => {
     const done = li.getAttribute('data-checked') === 'true';
     li.querySelector('label')?.remove();
+    li.classList.add('task');
+    if (done) li.classList.add('task-done');
     li.prepend(done ? '☑ ' : '☐ ');
   });
   return doc.body.innerHTML;

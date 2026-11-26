@@ -29,7 +29,7 @@ import { ConfirmDialog, ToastHost } from '../shared/overlays';
           <button class="icon-btn" (click)="auth.logout()" aria-label="Sign out" title="Sign out"><dm-icon name="logout" /></button>
         </div>
       </aside>
-      @if (menu()) { <div class="scrim" (click)="menu.set(false)"></div> }
+      @if (menu()) { <div class="scrim-m" (click)="menu.set(false)"></div> }
       <div class="main">
         <header class="top">
           <button class="icon-btn menu-btn" (click)="menu.set(!menu())" aria-label="Menu"><dm-icon name="menu" [size]="22" /></button>

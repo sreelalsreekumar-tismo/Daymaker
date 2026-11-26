@@ -43,7 +43,7 @@ export class Confirm {
 }
 
 export const DEFAULT_PREFS: Preferences = {
-  theme: 'system', accent: '#4f46e5', fontSize: 'medium', spacing: 'comfortable', todoLayout: 'list', noteLayout: 'grid',
+  theme: 'system', accent: '#007aff', fontSize: 'medium', spacing: 'comfortable', todoLayout: 'list', noteLayout: 'grid',
   notifyDeadlines: true, notifyMeetings: true, notifyTaskUpdates: true, notifyDailySummary: true,
 };
 const CACHE_KEY = 'daymaker.prefs';

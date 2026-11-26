@@ -36,7 +36,7 @@ const PATHS: Record<string, string> = {
 
 @Component({
   selector: 'dm-icon',
-  template: `<svg [attr.width]="size()" [attr.height]="size()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+  template: `<svg [attr.width]="size()" [attr.height]="size()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"
     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path [attr.d]="path()" /></svg>`,
   styles: `:host { display: inline-flex; vertical-align: middle; }`,
 })
