@@ -45,7 +45,7 @@ import { Icon } from '../shared/icon';
               </select></label>
           </div>
           @if (categoryId === -1) {
-            <div class="row"><input type="text" name="newcat" [(ngModel)]="newCategory" placeholder="Category name" maxlength="40" />
+            <div class="row"><input type="text" [value]="newCategory()" (input)="newCategory.set($any($event.target).value)" placeholder="Category name" maxlength="40" />
               <button type="button" class="btn" (click)="addCategory()">Add</button></div>
           }
 
@@ -61,7 +61,7 @@ import { Icon } from '../shared/icon';
                 <button type="button" class="icon-btn" (click)="removeItem($index)" aria-label="Remove item"><dm-icon name="x" [size]="14" /></button>
               </div>
             }
-            <div class="row"><input type="text" name="newitem" [(ngModel)]="newItem" placeholder="Add checklist item" (keydown.enter)="$event.preventDefault(); addItem()" />
+            <div class="row"><input type="text" name="newitem" [value]="newItem()" (input)="newItem.set($any($event.target).value)" placeholder="Add checklist item" (keydown.enter)="$event.preventDefault(); addItem()" />
               <button type="button" class="btn" (click)="addItem()">Add</button></div>
           </fieldset>
 
@@ -75,7 +75,7 @@ import { Icon } from '../shared/icon';
                   <button type="button" class="icon-btn" (click)="removeSub(s)" aria-label="Delete subtask"><dm-icon name="trash" [size]="14" /></button>
                 </div>
               }
-              <div class="row"><input type="text" name="newsub" [(ngModel)]="newSub" placeholder="Add subtask" (keydown.enter)="$event.preventDefault(); addSub()" />
+              <div class="row"><input type="text" name="newsub" [value]="newSub()" (input)="newSub.set($any($event.target).value)" placeholder="Add subtask" (keydown.enter)="$event.preventDefault(); addSub()" />
                 <button type="button" class="btn" (click)="addSub()">Add</button></div>
             </fieldset>
           }
@@ -137,7 +137,7 @@ export class TodoForm {
   title = ''; description = ''; due = ''; reminder = '';
   priority: Priority = 'Medium'; status: TodoStatus = 'ToDo'; recurrence: Recurrence = 'None';
   categoryId: number | null = null; tagText = ''; addToCalendar = false;
-  newItem = ''; newSub = ''; newCategory = '';
+  newItem = signal(''); newSub = signal(''); newCategory = signal('');
 
   constructor() {
     effect(() => {
@@ -159,7 +159,7 @@ export class TodoForm {
       this.checklist.set((t?.checklist ?? d.checklist ?? []).map((c) => ({ ...c })));
       this.subtasks.set([]);
       this.error.set('');
-      this.newItem = this.newSub = this.newCategory = '';
+      this.newItem.set(''); this.newSub.set(''); this.newCategory.set('');
       void this.loadLookups(t);
     });
   }
@@ -174,31 +174,31 @@ export class TodoForm {
   }
 
   async addCategory() {
-    const name = this.newCategory.trim();
+    const name = this.newCategory().trim();
     if (!name) return;
     try {
       const c = await this.api.createCategory(name, '#' + Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, '0'));
       this.categories.update((l) => [...l, c]);
-      this.categoryId = c.id; this.newCategory = '';
+      this.categoryId = c.id; this.newCategory.set('');
     } catch (e) { this.toasts.error(e); }
   }
 
   addItem() {
-    const text = this.newItem.trim();
+    const text = this.newItem().trim();
     if (!text) return;
     this.checklist.update((l) => [...l, { text, done: false }]);
-    this.newItem = '';
+    this.newItem.set('');
   }
   editItem(i: number, text: string) { this.checklist.update((l) => l.map((c, n) => (n === i ? { ...c, text } : c))); }
   toggleItem(i: number) { this.checklist.update((l) => l.map((c, n) => (n === i ? { ...c, done: !c.done } : c))); }
   removeItem(i: number) { this.checklist.update((l) => l.filter((_, n) => n !== i)); }
 
   async addSub() {
-    const parent = this.editing(); const title = this.newSub.trim();
+    const parent = this.editing(); const title = this.newSub().trim();
     if (!parent || !title) return;
     try {
       await this.api.createTodo({ title, parentId: parent.id });
-      this.newSub = '';
+      this.newSub.set('');
       this.subtasks.set(await this.api.subtasks(parent.id));
       this.store.changed();
     } catch (e) { this.toasts.error(e); }

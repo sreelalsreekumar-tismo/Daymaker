@@ -15,9 +15,10 @@ import { Icon } from './icon';
       }
     </div>`,
   styles: `
-    .host { position: fixed; right: 1rem; bottom: 1rem; z-index: 100; display: flex; flex-direction: column; gap: 0.5rem; max-width: min(92vw, 380px); }
-    .toast { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 0.8rem; border-radius: 10px; background: var(--text); color: var(--bg); box-shadow: var(--shadow-lg); font-size: 0.9rem; }
-    .toast.error { background: var(--danger); color: #fff; }
+    .host { position: fixed; left: 50%; transform: translateX(-50%); bottom: 1.4rem; z-index: 100; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; width: max-content; max-width: min(92vw, 420px); }
+    .toast { display: flex; align-items: center; gap: 0.6rem; padding: 0.65rem 0.9rem 0.65rem 1.1rem; border-radius: 999px; background: rgb(40 40 44 / 82%); color: #fff; backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); box-shadow: var(--shadow-lg); font-size: 0.9rem; animation: toast-in 0.35s var(--ease); }
+    .toast.error { background: rgb(255 59 48 / 90%); }
+    @keyframes toast-in { from { opacity: 0; transform: translateY(14px) scale(0.96); } }
     .toast span { flex: 1; } .toast .icon-btn { color: inherit; opacity: 0.8; }`,
 })
 export class ToastHost { toasts = inject(Toasts); }
@@ -37,7 +38,7 @@ export class ToastHost { toasts = inject(Toasts); }
       </div>
     }`,
   styles: `
-    .scrim { position: fixed; inset: 0; background: rgb(0 0 0 / 45%); display: grid; place-items: center; z-index: 120; padding: 1rem; }
-    .dlg { max-width: 420px; width: 100%; box-shadow: var(--shadow-lg); } p { margin-top: 0; }`,
+    .scrim { position: fixed; inset: 0; display: grid; place-items: center; z-index: 120; padding: 1rem; }
+    .dlg { max-width: 400px; width: 100%; box-shadow: var(--shadow-lg); padding: 1.4rem; } p { margin-top: 0; font-size: 1.02rem; }`,
 })
 export class ConfirmDialog { c = inject(Confirm); }

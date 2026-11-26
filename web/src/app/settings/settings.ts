@@ -7,7 +7,7 @@ import { ApiTokenInfo, GoogleCalendarInfo, GoogleStatus, Preferences } from '../
 import { Confirm, PreferencesService, Toasts } from '../core/ui.services';
 import { Icon } from '../shared/icon';
 
-const ACCENTS = ['#4f46e5', '#2563eb', '#0891b2', '#059669', '#d97706', '#dc2626', '#db2777', '#7c3aed'];
+const ACCENTS = ['#007aff', '#5856d6', '#af52de', '#ff2d55', '#ff3b30', '#ff9500', '#34c759', '#30b0c7'];
 
 @Component({
   selector: 'dm-settings',
@@ -24,7 +24,7 @@ const ACCENTS = ['#4f46e5', '#2563eb', '#0891b2', '#059669', '#d97706', '#dc2626
         <div class="line"><span>Accent colour</span>
           <div class="row">
             @for (c of accents; track c) {
-              <button class="sw" [style.background]="c" [class.on]="p().accent === c" (click)="set({ accent: c })" [attr.aria-label]="'Accent ' + c"></button>
+              <button class="sw" [style.background]="c" [style.color]="c" [class.on]="p().accent === c" (click)="set({ accent: c })" [attr.aria-label]="'Accent ' + c"></button>
             }
             <input type="color" [value]="p().accent" (input)="set({ accent: $any($event.target).value })" aria-label="Custom accent colour" />
           </div></div>
@@ -40,10 +40,10 @@ const ACCENTS = ['#4f46e5', '#2563eb', '#0891b2', '#059669', '#d97706', '#dc2626
 
       <section class="card stack" aria-labelledby="h-notif">
         <h2 id="h-notif">Notifications</h2>
-        <label class="line"><span>Approaching deadlines and reminders</span><input type="checkbox" [checked]="p().notifyDeadlines" (change)="set({ notifyDeadlines: $any($event.target).checked })" /></label>
-        <label class="line"><span>New or changed calendar meetings</span><input type="checkbox" [checked]="p().notifyMeetings" (change)="set({ notifyMeetings: $any($event.target).checked })" /></label>
-        <label class="line"><span>Task updates (e.g. made by Claude or Google Calendar)</span><input type="checkbox" [checked]="p().notifyTaskUpdates" (change)="set({ notifyTaskUpdates: $any($event.target).checked })" /></label>
-        <label class="line"><span>Daily summary (8:00 UTC)</span><input type="checkbox" [checked]="p().notifyDailySummary" (change)="set({ notifyDailySummary: $any($event.target).checked })" /></label>
+        <label class="line"><span>Approaching deadlines and reminders</span><input type="checkbox" class="switch" [checked]="p().notifyDeadlines" (change)="set({ notifyDeadlines: $any($event.target).checked })" /></label>
+        <label class="line"><span>New or changed calendar meetings</span><input type="checkbox" class="switch" [checked]="p().notifyMeetings" (change)="set({ notifyMeetings: $any($event.target).checked })" /></label>
+        <label class="line"><span>Task updates (e.g. made by Claude or Google Calendar)</span><input type="checkbox" class="switch" [checked]="p().notifyTaskUpdates" (change)="set({ notifyTaskUpdates: $any($event.target).checked })" /></label>
+        <label class="line"><span>Daily summary (8:00 UTC)</span><input type="checkbox" class="switch" [checked]="p().notifyDailySummary" (change)="set({ notifyDailySummary: $any($event.target).checked })" /></label>
       </section>
 
       <section class="card stack" aria-labelledby="h-google">
@@ -68,10 +68,10 @@ const ACCENTS = ['#4f46e5', '#2563eb', '#0891b2', '#059669', '#d97706', '#dc2626
           <h3>Calendars to show</h3>
           @for (c of calendars(); track c.id) {
             <label class="line"><span>{{ c.name }} @if (c.primary) { <span class="chip">primary</span> }</span>
-              <input type="checkbox" [checked]="c.selected" (change)="toggleCalendar(c, $any($event.target).checked)" /></label>
+              <input type="checkbox" class="switch" [checked]="c.selected" (change)="toggleCalendar(c, $any($event.target).checked)" /></label>
           }
           <label class="line"><span>Two-way sync <span class="muted small">(changes to linked meetings update the task)</span></span>
-            <input type="checkbox" [checked]="google()!.twoWaySync" (change)="setTwoWay($any($event.target).checked)" /></label>
+            <input type="checkbox" class="switch" [checked]="google()!.twoWaySync" (change)="setTwoWay($any($event.target).checked)" /></label>
           <div class="row">
             <button class="btn" (click)="connect()" [disabled]="busy()">Reconnect</button>
             <button class="btn danger" (click)="disconnect()" [disabled]="busy()">Disconnect</button>
@@ -105,11 +105,15 @@ const ACCENTS = ['#4f46e5', '#2563eb', '#0891b2', '#059669', '#d97706', '#dc2626
       </section>
     </div>`,
   styles: `
-    .narrow { max-width: 780px; } section { margin-bottom: 1rem; }
-    .line { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+    .narrow { max-width: 720px; } section { margin-bottom: 1.6rem; padding: 0.4rem 1.2rem 0.9rem; gap: 0; }
+    section > h2 { padding: 0.9rem 0 0.4rem; }
+    section > p { margin: 0.2rem 0 0.6rem; }
+    .line { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; padding: 0.72rem 0; border-bottom: 0.5px solid var(--border); min-height: 3rem; }
+    .line:last-child { border-bottom: 0; } section > .row, section > div:not(.line):not(.banner) { margin-top: 0.7rem; }
+    section > .banner { margin: 0.5rem 0; }
     .seg button { text-transform: capitalize; display: inline-flex; gap: 0.3rem; align-items: center; }
-    .sw { width: 1.7rem; height: 1.7rem; border-radius: 50%; border: 2px solid transparent; cursor: pointer; }
-    .sw.on { border-color: var(--text); outline: 2px solid var(--surface); outline-offset: -4px; }
+    .sw { width: 1.75rem; height: 1.75rem; border-radius: 50%; border: 0; cursor: pointer; box-shadow: inset 0 0 0 0.5px rgb(0 0 0 / 15%); transition: transform 0.15s var(--ease); }
+    .sw:hover { transform: scale(1.1); } .sw.on { box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px currentColor; }
     .tok { display: block; padding: 0.5rem 0.7rem; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow-wrap: anywhere; user-select: all; }`,
 })
 export class Settings {

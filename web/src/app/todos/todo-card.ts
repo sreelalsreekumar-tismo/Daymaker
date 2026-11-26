@@ -30,9 +30,10 @@ import { Icon } from '../shared/icon';
       <button class="icon-btn focus" (click)="focus.emit(todo())" aria-label="Focus on this task" title="Focus"><dm-icon name="target" [size]="16" /></button>
     </article>`,
   styles: `
-    .item { display: flex; gap: 0.7rem; align-items: flex-start; background: var(--surface); border: 1px solid var(--border); padding: var(--pad); border-radius: var(--radius); box-shadow: var(--shadow); }
-    .item.row { box-shadow: none; border-radius: 10px; padding-block: calc(var(--pad) * 0.7); align-items: center; }
-    .item.overdue { border-left: 3px solid var(--danger); }
+    .item { display: flex; gap: 0.8rem; align-items: flex-start; background: var(--surface); padding: var(--pad); border-radius: var(--radius); box-shadow: var(--shadow); transition: transform 0.2s var(--ease), box-shadow 0.2s; }
+    .item:hover { box-shadow: 0 0 0 0.5px rgb(0 0 0 / 6%), 0 6px 20px rgb(0 0 0 / 8%); }
+    .item.row { border-radius: 12px; padding-block: calc(var(--pad) * 0.75); align-items: center; }
+    .item.overdue input[type='checkbox'] { border-color: var(--danger); }
     .item.done .title { text-decoration: line-through; color: var(--muted); }
     .body { flex: 1; min-width: 0; cursor: pointer; display: flex; flex-direction: column; gap: 0.35rem; }
     .row .body { flex-direction: row; align-items: center; gap: 0.8rem; flex-wrap: wrap; }

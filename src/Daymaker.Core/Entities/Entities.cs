@@ -23,7 +23,7 @@ public class UserPreferences
     public int Id { get; set; }
     public int UserId { get; set; }
     public string Theme { get; set; } = "system";        // light|dark|system
-    public string Accent { get; set; } = "#4f46e5";
+    public string Accent { get; set; } = "#007aff";
     public string FontSize { get; set; } = "medium";     // small|medium|large
     public string Spacing { get; set; } = "comfortable"; // compact|comfortable
     public string TodoLayout { get; set; } = "list";     // list|grid|kanban
